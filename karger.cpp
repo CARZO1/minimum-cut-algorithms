@@ -27,10 +27,10 @@ namespace karger {
     }
 
     // union function for disjoint set
-    int unionSets(std::vector<int>& parent, std::vector<int>& rank, int a, int b) {
-        int a = findParent(parent, a);
-        int b = findParent(parent, b);
-        if (a == b) return 0; // already in the same set
+    void unionSets(std::vector<int>& parent, std::vector<int>& rank, int a, int b) {
+        a = findParent(parent, a);
+        b = findParent(parent, b);
+        if (a == b) return; // already in the same set
 
         if (rank[a] < rank[b]) std::swap(a, b); // attach smaller rank tree under root of higher rank tree
         parent[b] = a; // make a the parent of b
@@ -69,6 +69,30 @@ namespace karger {
             }
         }
 
-        // still need to implement rest of code
+        // Step 4 - determine which supernodes remain
+        std::vector<int> supernodes;
+        for (int i = 0; i < n; ++i) {
+            int p = findParent(parent, i);
+            if (std::find(supernodes.begin(), supernodes.end(), p) == supernodes.end()) {
+                supernodes.push_back(p);
+            }
+        }
+
+        if (supernodes.size() < 2) return 0; // no cut possible
+
+        int supernodeA = supernodes[0];
+        int supernodeB = supernodes[1];
+
+        // Step 5 - count crossing edges between the two remaining supernodes
+        int cutSize = 0;
+        for (const auto& e : edges) {
+            int a = findParent(parent, e.u);
+            int b = findParent(parent, e.v);
+            if (a == supernodeA && b == supernodeB) cutSize++;
+            else if (a == supernodeB && b == supernodeA) cutSize++;
+        }
+
+        std::cout << "Final cut size (deterministic Karger - fixed permutation): " << cutSize << "\n";
+        return cutSize;
     }
 }
