@@ -12,6 +12,7 @@ course focus on randomised algorithms in the second half.
 #include <iostream>
 #include <algorithm>
 #include <vector>
+#include <random>
 
 /* Dom S - Algorithm 1 - Randomised Karger Min Cut */
 
