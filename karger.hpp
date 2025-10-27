@@ -10,12 +10,12 @@
 #include <unordered_map>
 
 namespace karger {
-    // simple edge structure
-    struct Edge {
-        int u, v;
-    };
+    struct Edge { int u, v; };
 
-    // function to compute the minimum cut using a fixed permutation of edges
+    // Dominic S
+    int minCutRandomised(int n, const std::vector<Edge>& edges, std::uint64_t seed);
+
+    // Dominic C
     int minCutFixedPermutation(int n, const std::vector<Edge>& edges);
 }
 
