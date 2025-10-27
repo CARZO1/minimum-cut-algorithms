@@ -2,11 +2,10 @@
 I have chosen to create and implement a Randomistic Karger Algorithm. - Randomised Karger Min Cut
 This algorithm contracts randomly chosen edges repeatedly until it identifies only 2 supernodes. 
 The edges crossing the final supernodes signifies the minimum cut.
-I chose this because it’s simple to implement, clearly shows how
-randomisation is able to speed up graph algorithms, and allows direct
-comparison with deterministic variants. It also aligns with the
-course focus on randomised algorithms in the second half.
+I chose this because it’s simple to implement, clearly shows how randomisation is able to speed up graph algorithms, and allows direct
+comparison with deterministic variants. It also aligns with the course focus on randomised algorithms in the second half.
 */
+
 #include "karger.hpp"
 #include <random>
 #include <iostream>
