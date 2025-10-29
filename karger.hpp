@@ -41,6 +41,8 @@ namespace karger {
 
     // Domenic C
     int minCutFixedPermutation(int n, const std::vector<Edge>& edges);
+
+    // Jared S
 }
 
 #endif
