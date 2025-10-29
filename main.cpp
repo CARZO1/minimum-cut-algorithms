@@ -54,7 +54,6 @@ int main() {
     std::cout << "\ntest 7:\n";
     minCutRandomised(4, edges7, 333);
 
-    return 0;
     //Dom C Test Cases
     std::cout << "\nRunning Deterministic (Fixed Permutation):\n";
     karger::minCutFixedPermutation(n, edges);
