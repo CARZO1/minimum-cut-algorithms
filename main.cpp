@@ -34,5 +34,5 @@ int main() {
     //std::cout << "\nRunning Deterministic (Fixed Permutation):\n";
    // karger::minCutFixedPermutation(n, edges);
 
-   // return 0;
-//}
+   return 0;
+}
