@@ -24,23 +24,7 @@ My though process for the implementation is as follows:
 */
 
 namespace karger {
-    
-    int findParent(std::vector<int>& parent, int x) {
-        if (parent[x] == x) return x; // if vertex is its own parent, its the root
-        return parent[x] = findParent(parent, parent[x]);
-    }
-
-    void unionSets(std::vector<int>& parent, std::vector<int>& rank, int a, int b) {
-        a = findParent(parent, a);
-        b = findParent(parent, b);
-        if (a == b) return; // already in the same set
-
-        if (rank[a] < rank[b]) std::swap(a, b); // attach smaller rank tree under root of higher rank tree
-        parent[b] = a; // make a the parent of b
-        if (rank[a] == rank[b]) rank[a]++; // if both trees had same rank, increment rank of new root
-    }
-
-    int minCutFixedPermutation(int n, const std::vector<Edge>& edges) {
+int minCutFixedPermutation(int n, const std::vector<Edge>& edges) {
         if (n <= 1) return 0; // no cut possible
         if (edges.empty()) return 0; // no edges, no cut
 
