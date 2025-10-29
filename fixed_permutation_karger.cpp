@@ -24,13 +24,12 @@ My though process for the implementation is as follows:
 */
 
 namespace karger {
-    // find function for disjoint set
+    
     int findParent(std::vector<int>& parent, int x) {
         if (parent[x] == x) return x; // if vertex is its own parent, its the root
         return parent[x] = findParent(parent, parent[x]);
     }
 
-    // union function for disjoint set
     void unionSets(std::vector<int>& parent, std::vector<int>& rank, int a, int b) {
         a = findParent(parent, a);
         b = findParent(parent, b);

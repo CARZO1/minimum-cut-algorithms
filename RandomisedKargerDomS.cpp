@@ -21,24 +21,6 @@ int karger::minCutRandomised(int n, const std::vector<Edge>& edges, std::uint64_
     std::vector<int> parent(n), rank(n, 0);
     for (int i = 0; i < n; ++i) parent[i] = i;
 
-    auto findParent = [&](int x) {
-        while (parent[x] != x) {
-            parent[x] = parent[parent[x]];
-            x = parent[x];
-        }
-        return x;
-    };
-
-    auto unionSets = [&](int a, int b) {
-        a = findParent(a);
-        b = findParent(b);
-        if (a == b) return false;
-        if (rank[a] < rank[b]) std::swap(a, b);
-        parent[b] = a;
-        if (rank[a] == rank[b]) rank[a]++;
-        return true;
-    };
-
     std::mt19937_64 rng(seed);
     std::uniform_int_distribution<std::size_t> pick(0, edges.size() - 1);
 
