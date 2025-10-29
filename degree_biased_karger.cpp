@@ -61,12 +61,12 @@ void contract_edge(Graph& adj, vector<bool>& active, int u, int v) {
     
     // Remove any self-loop on u
     adj[u].erase(v);
+    
+    // Belt-and-braces: ensure no self-loop remains
+    adj[u].erase(u);
 }
 
-/*
-Deterministic Degree-Biased Karger's Algorithm
-Time: O(n·m), Space: O(n+m)
-*/
+//Time: O(n·m), Space: O(n+m)
 int deterministic_degree_biased_karger(int n, const vector<pair<int,int>>& edges) {
     if (n <= 1) return 0;
     
@@ -85,9 +85,9 @@ int deterministic_degree_biased_karger(int n, const vector<pair<int,int>>& edges
     
     // Contract until two supernodes remain
     while (num_active > 2) {
-        // Find edge with minimum deg(u)*deg(v), breaking ties by (u,v)
+        // Find edge with MAXIMUM deg(u)*deg(v), breaking ties by (u,v)
         int best_u = -1, best_v = -1;
-        long long best_score = LLONG_MAX;
+        long long best_score = -1;
         
         for (int u = 0; u < n; u++) {
             if (!active[u]) continue;
@@ -101,7 +101,7 @@ int deterministic_degree_biased_karger(int n, const vector<pair<int,int>>& edges
                 long long score = (long long)deg_u * deg_v;
                 
                 // Lexicographic comparison: (score, u, v)
-                if (score < best_score || 
+                if (score > best_score || 
                     (score == best_score && (u < best_u || (u == best_u && v < best_v)))) {
                     best_score = score;
                     best_u = u;
@@ -128,7 +128,12 @@ int deterministic_degree_biased_karger(int n, const vector<pair<int,int>>& edges
         if (active[i]) remaining.push_back(i);
     }
     
-    return adj[remaining[0]][remaining[1]];
+    // Use find to avoid inserting 0 if disconnected
+    auto it = adj[remaining[0]].find(remaining[1]);
+    if (it != adj[remaining[0]].end()) {
+        return it->second;
+    }
+    return 0;
 }
 
 //CLI: Read graph from stdin and output cut value
