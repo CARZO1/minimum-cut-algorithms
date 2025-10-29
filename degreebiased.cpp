@@ -63,8 +63,7 @@ void contract_edge(Graph& adj, vector<bool>& active, int u, int v) {
 }
 
 /*
-Deterministic Degree-Biased Karger's Algorithm (Baseline)
-
+Deterministic Degree-Biased Karger's Algorithm
 Time: O(n·m), Space: O(n+m)
 */
 int deterministic_degree_biased_karger(int n, const vector<pair<int,int>>& edges) {
