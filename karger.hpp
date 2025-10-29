@@ -39,7 +39,7 @@ namespace karger {
     // Dominic S
     int minCutRandomised(int n, const std::vector<Edge>& edges, std::uint64_t seed);
 
-    // Dominic C
+    // Domenic C
     int minCutFixedPermutation(int n, const std::vector<Edge>& edges);
 }
 

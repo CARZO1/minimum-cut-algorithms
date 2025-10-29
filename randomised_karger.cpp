@@ -15,6 +15,8 @@ comparison with deterministic variants. It also aligns with the course focus on 
 
 /* Dom S - Algorithm 1 - Randomised Karger Min Cut */
 
+using namespace karger;
+
 int karger::minCutRandomised(int n, const std::vector<Edge>& edges, std::uint64_t seed) {
     if (n <= 1 || edges.empty()) return 0;
 
@@ -27,16 +29,16 @@ int karger::minCutRandomised(int n, const std::vector<Edge>& edges, std::uint64_
     int supernodes = n;
     while (supernodes > 2) {
         const auto& e = edges[pick(rng)];
-        int a = findParent(e.u);
-        int b = findParent(e.v);
+        int a = findParent(parent, e.u);
+        int b = findParent(parent, e.v);
         if (a == b) continue;
-        unionSets(a, b);
+        unionSets(parent, rank, a, b);
         --supernodes;
     }
 
     int repA = -1, repB = -1;
     for (int i = 0; i < n; ++i) {
-        int r = findParent(i);
+        int r = findParent(parent, i);
         if (repA == -1) repA = r;
         else if (r != repA) { repB = r; break; }
     }
@@ -44,8 +46,8 @@ int karger::minCutRandomised(int n, const std::vector<Edge>& edges, std::uint64_
 
     int cutSize = 0;
     for (const auto& e : edges) {
-        int a = findParent(e.u);
-        int b = findParent(e.v);
+        int a = findParent(parent, e.u);
+        int b = findParent(parent, e.v);
         if ((a == repA && b == repB) || (a == repB && b == repA))
             ++cutSize;
     }
