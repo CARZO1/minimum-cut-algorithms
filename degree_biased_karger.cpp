@@ -7,7 +7,6 @@ I selected this algorithm because it:
 - removes randomness while still following the core contraction principle of Karger’s approach
 - attempts to preserve likely min-cut edges for as long as possible by merging denser regions first
 - maintains support for multigraphs with parallel edges, an important aspect of minimum-cut problems
-- allows a direct and measurable comparison against both the randomised and fixed-permutation variants implemented by my group members
 
 My thought process for the implementation is as follows:
 1. Represent the input as a multigraph adjacency list, storing parallel edge multiplicities
