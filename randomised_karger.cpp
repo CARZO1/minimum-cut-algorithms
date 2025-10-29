@@ -53,3 +53,4 @@ int karger::minCutRandomised(int n, const std::vector<Edge>& edges, std::uint64_
     std::cout << "Final cut size (Randomised Karger, seed " << seed << "): "
               << cutSize << "\n";
     return cutSize;
+}
