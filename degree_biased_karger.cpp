@@ -67,23 +67,34 @@ void contract_edge(Graph& adj, vector<bool>& active, int u, int v) {
     adj[u].erase(u);
 }
 
-bool is_likely_bridge(const Graph& adj, int u, int v, const vector<bool>& active) {
-    unordered_set<int> neighbors_u;
-    for (const auto& [w, mult] : adj[u]) {
-        if (w != v && active[w]) neighbors_u.insert(w);
-    }
+bool is_cut_edge(const Graph& adj, int u, int v, const vector<bool>& active) {
+    // Do BFS/DFS from u without using edge to v
+    // If we can't reach v, the edge is a cut edge
+    unordered_set<int> visited;
+    queue<int> q;
+    q.push(u);
+    visited.insert(u);
     
-    int common = 0;
-    for (const auto& [w, mult] : adj[v]) {
-        if (w != u && active[w] && neighbors_u.count(w)) {
-            common++;
+    while (!q.empty()) {
+        int curr = q.front();
+        q.pop();
+        
+        for (const auto& [neighbor, mult] : adj[curr]) {
+            if (!active[neighbor]) continue;
+            if (curr == u && neighbor == v) continue;  // Don't use the edge (u,v)
+            if (curr == v && neighbor == u) continue;  // Don't use the edge (v,u)
+            
+            if (visited.find(neighbor) == visited.end()) {
+                visited.insert(neighbor);
+                q.push(neighbor);
+                
+                if (neighbor == v) return false;  // Reached v without using edge
+            }
         }
     }
     
-    // If they have 0 or 1 common neighbors, likely a bridge/bottleneck
-    // (In a triangle, two vertices share at least 1 other vertex)
-    // (In a barbell bridge, the endpoints share 0 common neighbors)
-    return common <= 1;
+    // Couldn't reach v from u without using the edge
+    return true;
 }
 
 //Time: O(n·m), Space: O(n+m)
@@ -120,14 +131,13 @@ int deterministic_degree_biased_karger(int n, const vector<pair<int,int>>& edges
                 int deg_v = compute_degree(adj, v);
                 long long score = (long long)deg_u * deg_v;
 
-                // Penalise likely bridge edges heavily so they're contracted last
-                if (is_likely_bridge(adj, u, v, active)) {
-                    score = score * 100; // Make it very unattractive for MAX selection
-               }
+                // HEAVILY penalize cut edges so they're never contracted early
+                if (mult == 1 && is_cut_edge(adj, u, v, active)) {
+                    score = 1;  // min score
+                }
                 
                 // Lexicographic comparison: (score, u, v)
-                if (score > best_score ||
-+                    (score == best_score && make_pair(u, v) < make_pair(best_u, best_v))) {
+                if (score > best_score || (score == best_score && make_pair(u, v) < make_pair(best_u, best_v))) {
                     best_score = score;
                     best_u = u;
                     best_v = v;
