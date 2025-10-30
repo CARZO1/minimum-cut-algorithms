@@ -2,16 +2,16 @@
 /* Dom C
 I have chosen to implement the Deterministic Karger – Fixed Permutation algorithm.
 
-This algorithm is a derandomised version of the classic Karger's random contraction algorithm, for finding the minimunm cut of
-an underirected graph. The algorithm works by contracting edges in a fixed order, rather than randomly selecting edges to contract.
+This algorithm is a derandomised version of the classic Karger's random contraction algorithm, for finding the minimum cut of
+an undirected graph. The algorithm works by contracting edges in a fixed order, rather than randomly selecting edges to contract.
 
 I selected this algorithm because it:
 - clearly demonstrates how randomness in algorithms can be removed through deterministic ordering
-- retains the simplictiy of the original Karger algorithm (edge contradtion)
+- retains the simplicity of the original Karger algorithm (edge contradtion)
 - is straightforward to implement and test using disjoint sets (union-find data structure)
 - allows a direct comparison with the randomised version of Karger's algorithm
 
-My though process for the implementation is as follows:
+My thought process for the implementation is as follows:
 1) Represent the graph as a list of undirected edges
 2) Sort these edges deterministically based on vertex IDs (this replaces randomness)
 3) Repeatedly contract edges in that fixed order until only two supernodes remain
