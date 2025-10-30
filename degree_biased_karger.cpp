@@ -67,6 +67,16 @@ void contract_edge(Graph& adj, vector<bool>& active, int u, int v) {
     adj[u].erase(u);
 }
 
+bool in_triangle(const Graph& adj, int u, int v, const vector<bool>& active) {
+    // Check if u and v have a common neighbor
+    for (const auto& [w_u, mult_u] : adj[u]) {
+        if (!active[w_u] || w_u == v) continue;
+        if (adj[v].count(w_u) && active[w_u]) {
+            return true;  // Found common neighbor w_u
+        }
+    }
+    return false;
+}
 bool is_cut_edge(const Graph& adj, int u, int v, const vector<bool>& active) {
     // Do BFS/DFS from u without using edge to v
     // If we can't reach v, the edge is a cut edge
@@ -131,7 +141,11 @@ int deterministic_degree_biased_karger(int n, const vector<pair<int,int>>& edges
                 int deg_v = compute_degree(adj, v);
                 long long score = (long long)deg_u * deg_v;
 
-                // HEAVILY penalize cut edges so they're never contracted early
+                // Deprioritize edges that are NOT part of triangles (likely structural)
+                if (!in_triangle(adj, u, v, active) && mult == 1) {
+                    score = 1;  // Reduce priority 
+                }
+
                 if (mult == 1 && is_cut_edge(adj, u, v, active)) {
                     score = 1;  // min score
                 }
