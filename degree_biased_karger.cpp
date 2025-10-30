@@ -25,6 +25,7 @@ My thought process for the implementation is as follows:
 #include <tuple>
 #include <queue>
 #include <string>
+#include <climits>
 
 using namespace std;
 
@@ -66,6 +67,25 @@ void contract_edge(Graph& adj, vector<bool>& active, int u, int v) {
     adj[u].erase(u);
 }
 
+bool is_likely_bridge(const Graph& adj, int u, int v, const vector<bool>& active) {
+    unordered_set<int> neighbors_u;
+    for (const auto& [w, mult] : adj[u]) {
+        if (w != v && active[w]) neighbors_u.insert(w);
+    }
+    
+    int common = 0;
+    for (const auto& [w, mult] : adj[v]) {
+        if (w != u && active[w] && neighbors_u.count(w)) {
+            common++;
+        }
+    }
+    
+    // If they have 0 or 1 common neighbors, likely a bridge/bottleneck
+    // (In a triangle, two vertices share at least 1 other vertex)
+    // (In a barbell bridge, the endpoints share 0 common neighbors)
+    return common <= 1;
+}
+
 //Time: O(n·m), Space: O(n+m)
 int deterministic_degree_biased_karger(int n, const vector<pair<int,int>>& edges) {
     if (n <= 1) return 0;
@@ -99,10 +119,15 @@ int deterministic_degree_biased_karger(int n, const vector<pair<int,int>>& edges
                 
                 int deg_v = compute_degree(adj, v);
                 long long score = (long long)deg_u * deg_v;
+
+                // Penalise likely bridge edges heavily so they're contracted last
+                if (is_likely_bridge(adj, u, v, active)) {
+                    score = score * 100; // Make it very unattractive for MAX selection
+               }
                 
                 // Lexicographic comparison: (score, u, v)
-                if (score > best_score || 
-                    (score == best_score && (u < best_u || (u == best_u && v < best_v)))) {
+                if (score > best_score ||
++                    (score == best_score && make_pair(u, v) < make_pair(best_u, best_v))) {
                     best_score = score;
                     best_u = u;
                     best_v = v;
@@ -164,132 +189,31 @@ void run_tests() {
     };
     
     vector<TestCase> tests = {
-        {
-            "Two triangles with bridge",
-            6,
-            {{0,1},{1,2},{2,0},{3,4},{4,5},{5,3},{2,3}},
-            1
-        },
-        {
-            "Square with diagonal",
-            4,
-            {{0,1},{1,2},{2,3},{3,0},{0,2}},
-            2
-        },
-        {
-            "Triangle",
-            3,
-            {{0,1},{1,2},{0,2}},
-            2
-        },
-        {
-            "Parallel edges (multiplicity 3)",
-            2,
-            {{0,1},{0,1},{0,1}},
-            3
-        },
-        {
-            "Disconnected graph",
-            3,
-            {},
-            0
-        },
-        {
-            "Barbell - single bridge",
-            6,
-            {{0,1},{1,2},{2,0}, {3,4},{4,5},{5,3}, {2,3}},
-            1
-        },
-        {
-            "Barbell - double bridge",
-            6,
-            {{0,1},{1,2},{2,0}, {3,4},{4,5},{5,3}, {2,3},{2,3}},
-            2
-        },
-        {
-            "Lollipop - K3 + path",
-            5,
-            {{0,1},{1,2},{2,0}, {2,3},{3,4}},
-            1
-        },
-        {
-            "Graph with isolated vertices",
-            5,
-            {{0,1},{1,2},{2,0}},
-            0
-        },
-        {
-            "C4 with one diagonal",
-            4,
-            {{0,1},{1,2},{2,3},{3,0}, {1,3}},
-            2
-        },
-        {
-            "C5 with one chord",
-            5,
-            {{0,1},{1,2},{2,3},{3,4},{4,0}, {0,2}},
-            2
-        },
-        {
-            "C6 with symmetric chords",
-            6,
-            {{0,1},{1,2},{2,3},{3,4},{4,5},{5,0}, {0,3},{1,4}},
-            3
-        },
-        {
-            "Complete K4",
-            4,
-            {{0,1},{0,2},{0,3},{1,2},{1,3},{2,3}},
-            3
-        },
-        {
-            "Complete K5",
-            5,
-            {{0,1},{0,2},{0,3},{0,4},{1,2},{1,3},{1,4},{2,3},{2,4},{3,4}},
-            4
-        },
-        {
-            "Triangle with asymmetric multiplicities",
-            3,
-            {{0,1},{0,1},{0,1}, {1,2}, {2,0}},
-            2
-        },
-        {
-            "Dual-path bottleneck",
-            8,
-            {{0,1},{1,0}, {2,3},{3,2},  
-            {0,4},{4,5},{5,2},          
-            {1,6},{6,7},{7,3}},         
-            2
-        },
-        {
-            "K4 with pendant via 2 edges",
-            5,
-            {{0,1},{0,2},{0,3},{1,2},{1,3},{2,3}, {3,4},{3,4}},
-            2
-        },
-        {
-            "Weighted star graph",
-            5,
-            {{0,1},{0,1}, {0,2},{0,2},{0,2}, {0,3}, {0,4}},
-            1
-        },
-        {
-            "K5 minus one edge",
-            5,
-            {{0,1},{0,2},{0,3},{0,4},{1,2},{1,3},{1,4},{2,3},{2,4}},
-            3
-        },
-        {
-            "Bowtie (two triangles, shared vertex)",
-            5,
-            {{0,1},{1,2},{2,0}, {2,3},{3,4},{4,2}},
-            2
-        }
+        {"Two triangles with bridge", 6,{{0,1},{1,2},{2,0},{3,4},{4,5},{5,3},{2,3}}, 1},
+        {"Square with diagonal", 4, {{0,1},{1,2},{2,3},{3,0},{0,2}}, 2},
+        {"Triangle", 3, {{0,1},{1,2},{0,2}}, 2},
+        {"Parallel edges (multiplicity 3)", 2, {{0,1},{0,1},{0,1}}, 3},
+        {"Disconnected graph", 3, {}, 0},
+        {"Barbell - single bridge", 6, {{0,1},{1,2},{2,0}, {3,4},{4,5},{5,3}, {2,3}}, 1},
+        {"Barbell - double bridge", 6, {{0,1},{1,2},{2,0}, {3,4},{4,5},{5,3}, {2,3},{2,3}}, 2},
+        {"Lollipop - K3 + path", 5, {{0,1},{1,2},{2,0}, {2,3},{3,4}}, 1},
+        {"Graph with isolated vertices", 5, {{0,1},{1,2},{2,0}}, 0},
+        {"C4 with one diagonal", 4, {{0,1},{1,2},{2,3},{3,0}, {1,3}}, 2},
+        {"C5 with one chord", 5, {{0,1},{1,2},{2,3},{3,4},{4,0}, {0,2}}, 2},
+        {"C6 with symmetric chords", 6, {{0,1},{1,2},{2,3},{3,4},{4,5},{5,0}, {0,3},{1,4}}, 3},
+        {"Complete K4", 4, {{0,1},{0,2},{0,3},{1,2},{1,3},{2,3}}, 3},
+        {"Complete K5", 5, {{0,1},{0,2},{0,3},{0,4},{1,2},{1,3},{1,4},{2,3},{2,4},{3,4}},4},
+        {"Triangle with asymmetric multiplicities", 3, {{0,1},{0,1},{0,1}, {1,2}, {2,0}}, 2},
+        {"Dual-path bottleneck", 8, {{0,1},{1,0}, {2,3},{3,2},  {0,4},{4,5},{5,2}, {1,6},{6,7},{7,3}}, 2},
+        {"K4 with pendant via 2 edges", 5, {{0,1},{0,2},{0,3},{1,2},{1,3},{2,3}, {3,4},{3,4}}, 2},
+        {"Weighted star graph", 5, {{0,1},{0,1}, {0,2},{0,2},{0,2}, {0,3}, {0,4}}, 1},
+        {"K5 minus one edge", 5, {{0,1},{0,2},{0,3},{0,4},{1,2},{1,3},{1,4},{2,3},{2,4}}, 3},
+        {"Bowtie (two triangles, shared vertex)", 5, {{0,1},{1,2},{2,0}, {2,3},{3,4},{4,2}}, 2}
     };
     
     bool all_passed = true;
-    
+    int failcount = 0;
+
     for (const auto& test : tests) {
         int result = deterministic_degree_biased_karger(test.n, test.edges);
         bool passed = (result == test.expected);
@@ -297,15 +221,17 @@ void run_tests() {
         
         cout << "[" << (passed ? "PASS" : "FAIL") << "] " << test.name << endl;
         cout << "  Expected: " << test.expected << ", Got: " << result << endl;
+        if (!passed){
+            failcount++;
+        }
     }
     
-    cout << string(50, '=') << endl;
+    cout << string(50, '-') << endl;
     if (all_passed) {
         cout << "All tests PASSED" << endl;
     } else {
-        cout << "Some tests FAILED" << endl;
+        cout << std::to_string(failcount) + " tests FAILED" << endl;
     }
-    cout << string(50, '=') << endl;
 }
 
 int main(int argc, char* argv[]) {
