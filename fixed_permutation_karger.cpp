@@ -1,9 +1,4 @@
 #include "karger.hpp"
-#include <random>
-#include <iostream>
-#include <algorithm>
-#include <vector>
-#include <random>
 /* Dom C
 I have chosen to implement the Deterministic Karger – Fixed Permutation algorithm.
 
@@ -82,4 +77,69 @@ int minCutFixedPermutation(int n, const std::vector<Edge>& edges) {
         std::cout << "Final cut size (deterministic Karger - fixed permutation): " << cutSize << "\n";
         return cutSize;
     }
+}
+
+int main() {
+    std::cout << "Dom C - Deterministic Karger (Fixed Permutation) Tests\n";
+
+    struct TestCase {
+        std::string name;
+        int n;
+        std::vector<karger::Edge> edges;
+    };
+
+    std::vector<TestCase> domCTests = {
+        // Small / hand-checkable
+        {"simple 4-node (K4 minus 0-3)", 4, {{0,1},{0,2},{1,2},{1,3},{2,3}}}, // global min cut = 2
+        {"triangle", 3, {{0,1},{1,2},{0,2}}}, // global min cut = 2
+        {"path length 3", 4, {{0,1},{1,2},{2,3}}}, // global min cut = 1
+        {"square cycle", 4, {{0,1},{1,2},{2,3},{3,0}}}, // global min cut = 2
+        {"star graph", 5, {{0,1},{0,2},{0,3},{0,4}}}, // global min cut = 1
+
+        // Cliques
+        {"complete K4", 4, {{0,1},{0,2},{0,3},{1,2},{1,3},{2,3}}}, // global min cut = 3
+        {"complete K5", 5, {
+            {0,1},{0,2},{0,3},{0,4},
+            {1,2},{1,3},{1,4},
+            {2,3},{2,4},
+            {3,4}
+        }}, // global min cut = 4
+
+        // Bipartite / structured
+        {"complete bipartite K2,3", 5, {
+            {0,2},{0,3},{0,4},
+            {1,2},{1,3},{1,4}
+        }}, // global min cut = 2
+        {"cycle with chord (C4 + diagonal 0-2)", 4, {{0,1},{1,2},{2,3},{3,0},{0,2}}}, // global min cut = 2
+
+        // Bridges & multi-edges
+        {"two triangles + single bridge", 6, {
+            {0,1},{1,2},{0,2}, // left triangle
+            {3,4},{4,5},{3,5}, // right triangle
+            {2,3} // single bridge (global min cut = 1)
+        }},
+        {"two triangles + double bridge (parallel edges)", 6, {
+            {0,1},{1,2},{0,2},
+            {3,4},{4,5},{3,5},
+            {2,3},{2,3} // two parallel bridges (global min cut = 2)
+        }},
+
+        // Parallel edges inside a component
+        {"square + parallel edge", 4, {{0,1},{1,2},{2,3},{3,0},{0,1}}}, // still expect a small cut (>=2)
+
+        // Self-loops (should be ignored by logic)
+        {"triangle + self-loop", 3, {{0,1},{1,2},{0,2},{1,1}}}, // self-loop should not affect cut
+
+        // Disconnected / sparse
+        {"disconnected (one edge only)", 5, {{0,1}}}, // global min cut = 0
+        {"empty graph", 4, {}}, // global min cut = 0
+    };
+
+    for (const auto& test : domCTests) {
+        std::cout << "test: " << test.name << "\n";
+        int cut = karger::minCutFixedPermutation(test.n, test.edges);
+        std::cout << "cut = " << cut << "\n";
+    }
+
+    return 0;
 }
