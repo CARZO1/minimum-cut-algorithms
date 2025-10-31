@@ -1,20 +1,29 @@
 /* Jared S
 I have chosen to implement the Deterministic Karger – Degree-Biased Contraction algorithm.
 
-This algorithm is a derandomised version of the classic Karger’s random contraction algorithm, used for finding the minimum cut in an undirected multigraph. Instead of randomly selecting edges to contract, it uses a deterministic heuristic based on vertex degrees to decide which edge to contract at each step.
+This algorithm is a derandomised version of the classic Karger’s random contraction 
+algorithm, used for finding the minimum cut in an undirected multigraph. Instead of 
+randomly selecting edges to contract, it uses a deterministic heuristic based on 
+vertex degrees to decide which edge to contract at each step.
 
 I selected this algorithm because it:
-- removes randomness while still following the core contraction principle of Karger’s approach
-- attempts to preserve likely min-cut edges for as long as possible by merging denser regions first
-- maintains support for multigraphs with parallel edges, an important aspect of minimum-cut problems
+- removes randomness while still following the core contraction principle of 
+Karger’s approach
+- attempts to preserve likely min-cut edges for as long as possible by merging 
+denser regions first
+- maintains support for multigraphs with parallel edges, an important aspect of 
+minimum-cut problems
 
 My thought process for the implementation is as follows:
 1. Represent the input as a multigraph adjacency list, storing parallel edge multiplicities
 2. At each iteration, compute the degree product of every remaining edge (deg(u) × deg(v))
-3. Deterministically select the edge with the smallest degree product, breaking ties lexicographically by vertex ID
-4. Contract the larger-indexed vertex into the smaller one, preserving multiplicities and removing self-loops
+3. Deterministically select the edge with the smallest degree product, breaking ties 
+lexicographically by vertex ID
+4. Contract the larger-indexed vertex into the smaller one, preserving multiplicities and 
+removing self-loops
 5. Continue contracting until only two supernodes remain
-6. Return the multiplicity of edges between the final two supernodes, which represents the cut size
+6. Return the multiplicity of edges between the final two supernodes, which represents the 
+cut size
 */
 
 #include <iostream>
