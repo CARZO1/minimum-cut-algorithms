@@ -1,7 +1,7 @@
 /* Jared S
 I have chosen to implement the Deterministic Karger – Degree-Biased Contraction algorithm.
 
-This algorithm is also a derandomised version of the classic Karger’s random contraction algorithm, used for finding the minimum cut in an undirected multigraph. Instead of randomly selecting edges to contract, it uses a deterministic heuristic based on vertex degrees to decide which edge to contract at each step.
+This algorithm is a derandomised version of the classic Karger’s random contraction algorithm, used for finding the minimum cut in an undirected multigraph. Instead of randomly selecting edges to contract, it uses a deterministic heuristic based on vertex degrees to decide which edge to contract at each step.
 
 I selected this algorithm because it:
 - removes randomness while still following the core contraction principle of Karger’s approach
@@ -131,6 +131,7 @@ int deterministic_degree_biased_karger(int n, const vector<pair<int,int>>& edges
                 int deg_v = compute_degree(adj, v);
                 long long score = (long long)deg_u * deg_v;
 
+                //penalise
                 if (mult == 1 && is_cut_edge(adj, u, v, active)) {
                     score = 1;  // min score
                 }
@@ -170,7 +171,6 @@ int deterministic_degree_biased_karger(int n, const vector<pair<int,int>>& edges
     return 0;
 }
 
-//CLI: Read graph from stdin and output cut value
 void run_cli() {
     int n, m;
     cin >> n >> m;
